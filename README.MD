@@ -1,4 +1,4 @@
-# FSAPI
+# Fit Streak API
 
 Trabalho da disciplina **Desenvolvimento Backend (DCC208)**.
 
