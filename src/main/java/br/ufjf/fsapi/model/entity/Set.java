@@ -23,4 +23,8 @@ public class Set {
 
     @ManyToOne
     private PlanExercise planExercise;
+
+    public Exercise getExercise(){
+        return planExercise.getExercise();
+    }
 }
