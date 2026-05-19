@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
+@Table(name = "body_metrics")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
