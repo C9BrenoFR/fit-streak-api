@@ -23,7 +23,6 @@ public class BodyMetrics {
     private double leanMass;
     private double bodyWater;
     private Integer visceralFat;
-    private Integer bmi;
     //private LocalDate date;
 
     @ManyToOne

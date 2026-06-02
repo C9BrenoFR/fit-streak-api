@@ -19,7 +19,6 @@ public class BodyMetricsDTO {
     private double leanMass;
     private double bodyWater;
     private Integer visceralFat;
-    private Integer bmi;
     private Long idUser;
 
     public static BodyMetricsDTO create(BodyMetrics bodyMetrics){
