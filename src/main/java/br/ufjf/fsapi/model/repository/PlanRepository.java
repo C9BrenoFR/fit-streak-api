@@ -1,7 +1,12 @@
 package br.ufjf.fsapi.model.repository;
 
 import br.ufjf.fsapi.model.entity.Plan;
+import br.ufjf.fsapi.model.entity.Workout;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
+import java.util.Optional;
+
 public interface PlanRepository extends JpaRepository<Plan, Long> {
+    List<Plan> findByWorkout (Optional<Workout> workout);
 }
