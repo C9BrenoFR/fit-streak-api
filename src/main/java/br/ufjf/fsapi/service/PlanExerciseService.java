@@ -16,6 +16,18 @@ import java.util.Optional;
 public class PlanExerciseService {
     private PlanExerciseRepository repository;
 
+    public PlanExerciseService(PlanExerciseRepository repository) {
+        this.repository = repository;
+    }
+
+    public List<PlanExercise> getAll(){
+        return repository.findAll();
+    }
+
+    public Optional<PlanExercise> getById(Long id){
+        return repository.findById(id);
+    }
+
     public List<PlanExercise> getByPlan (Optional<Plan> plan){
         return repository.findByPlan(plan);
     }

@@ -8,14 +8,23 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
 public class ExerciseService {
     private ExerciseRepository repository;
 
-    public List<Exercise> getAll ()
+    public ExerciseService(ExerciseRepository repository) {
+        this.repository = repository;
+    }
+
+    public List<Exercise> getAll()
     {
         return repository.findAll();
+    }
+
+    public Optional<Exercise> getById(Long id){
+        return repository.findById(id);
     }
 
     @Transactional

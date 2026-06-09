@@ -15,6 +15,18 @@ import java.util.Optional;
 public class SetService {
     private SetRepository repository;
 
+    public SetService(SetRepository repository) {
+        this.repository = repository;
+    }
+
+    public List<Set> getAll(){
+        return repository.findAll();
+    }
+
+    public Optional<Set> getById(Long id){
+        return repository.findById(id);
+    }
+
     public List<Set> getByPlanExercise (Optional<PlanExercise> planExercise){
         return repository.findByPlanExercise(planExercise);
     }
