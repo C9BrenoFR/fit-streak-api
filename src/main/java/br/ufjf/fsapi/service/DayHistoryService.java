@@ -16,9 +16,15 @@ import java.util.Optional;
 public class DayHistoryService {
     private DayHistoryRepository repository;
 
+    public DayHistoryService(DayHistoryRepository repository) {
+        this.repository = repository;
+    }
+
     public List<DayHistory> getByUser (Optional<User> user){
         return repository.findByUser(user);
     }
+
+    public Optional<DayHistory> getById(Long id){ return repository.findById(id); }
 
     @Transactional
     public DayHistory save(DayHistory dayHistory){

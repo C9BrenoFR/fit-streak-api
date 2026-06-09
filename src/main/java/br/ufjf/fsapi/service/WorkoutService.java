@@ -15,9 +15,15 @@ import java.util.Optional;
 public class WorkoutService {
     private WorkoutRepository repository;
 
+    public WorkoutService(WorkoutRepository repository) {
+        this.repository = repository;
+    }
+
     public List<Workout> getByUser (Optional<User> user){
         return repository.findByUser(user);
     }
+
+    public Optional<Workout> getById (Long id) { return repository.findById(id); }
 
     @Transactional
     public Workout save(Workout workout){
