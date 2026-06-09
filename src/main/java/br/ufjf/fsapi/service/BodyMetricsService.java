@@ -15,6 +15,18 @@ import java.util.Optional;
 public class BodyMetricsService {
     private BodyMetricsRepository repository;
 
+    public BodyMetricsService(BodyMetricsRepository repository) {
+        this.repository = repository;
+    }
+
+    public List<BodyMetrics> getAll(){
+        return repository.findAll();
+    }
+
+    public Optional<BodyMetrics> getById(Long id){
+        return repository.findById(id);
+    }
+
     public List<BodyMetrics> getByUser(Optional<User> user){
         return repository.findByUser(user);
     }

@@ -71,7 +71,21 @@ public class UserController {
             User user = convert(dto);
             user.setId(id);
             user = service.save(user);
-            return new ResponseEntity(user, HttpStatus.CREATED);
+            return new ResponseEntity(user, HttpStatus.OK);
+        } catch (BusinessRuleException e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity delete(@PathVariable("id") Long id){
+        Optional<User> user = service.getById(id);
+        if(!user.isPresent()){
+            return new ResponseEntity("Usuário não encontrado", HttpStatus.NOT_FOUND);
+        }
+        try {
+            service.destroy(user.get());
+            return new ResponseEntity(HttpStatus.NO_CONTENT);
         } catch (BusinessRuleException e){
             return ResponseEntity.badRequest().body(e.getMessage());
         }
