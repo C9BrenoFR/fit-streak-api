@@ -28,12 +28,6 @@ public class WorkoutController {
     private final UserService userService;
     private final PlanService planService;
 
-    @GetMapping()
-    public ResponseEntity get(){
-        List<Workout> workouts = service.getByUser(Optional.empty());
-        return ResponseEntity.ok(workouts.stream().map(WorkoutDTO::create).collect(Collectors.toList()));
-    }
-
     @GetMapping("/{id}")
     public ResponseEntity find(@PathVariable("id") Long id){
         Optional<Workout> workout = service.getById(id);
