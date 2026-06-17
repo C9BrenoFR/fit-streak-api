@@ -1,10 +1,16 @@
 package br.ufjf.fsapi.api.controller;
 
+import br.ufjf.fsapi.api.dto.BodyMetricsDTO;
+import br.ufjf.fsapi.api.dto.DayHistoryDTO;
 import br.ufjf.fsapi.api.dto.UserDTO;
 import br.ufjf.fsapi.api.dto.WorkoutDTO;
 import br.ufjf.fsapi.exception.BusinessRuleException;
+import br.ufjf.fsapi.model.entity.BodyMetrics;
+import br.ufjf.fsapi.model.entity.DayHistory;
 import br.ufjf.fsapi.model.entity.User;
 import br.ufjf.fsapi.model.entity.Workout;
+import br.ufjf.fsapi.service.BodyMetricsService;
+import br.ufjf.fsapi.service.DayHistoryService;
 import br.ufjf.fsapi.service.UserService;
 import br.ufjf.fsapi.service.WorkoutService;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +30,8 @@ import java.util.stream.Collectors;
 public class UserController {
     private final UserService service;
     private final WorkoutService workoutService;
+    private final BodyMetricsService dayService;
+    private final DayHistoryService dayHistoryService;
 
     @GetMapping()
     public ResponseEntity get(){
@@ -49,6 +57,28 @@ public class UserController {
 
         List<Workout> workouts = workoutService.getByUser(user);
         return ResponseEntity.ok(workouts.stream().map(WorkoutDTO::create).collect(Collectors.toList()));
+    }
+
+    @GetMapping("/{id}/bodymetrics")
+    public ResponseEntity getBodyMetrics(@PathVariable("id") Long id){
+        Optional<User> user = service.getById(id);
+        if(!user.isPresent()){
+            return new ResponseEntity("Usuário não encontrado", HttpStatus.NOT_FOUND);
+        }
+
+        List<BodyMetrics> day = dayService.getByUser(user);
+        return ResponseEntity.ok(day.stream().map(BodyMetricsDTO::create).collect(Collectors.toList()));
+    }
+
+    @GetMapping("/{id}/history")
+    public ResponseEntity getDayHistories(@PathVariable("id") Long id){
+        Optional<User> user = service.getById(id);
+        if(!user.isPresent()){
+            return new ResponseEntity("Usuário não encontrado", HttpStatus.NOT_FOUND);
+        }
+
+        List<DayHistory> dayHistories = dayHistoryService.getByUser(user);
+        return ResponseEntity.ok(dayHistories.stream().map(DayHistoryDTO::create).collect(Collectors.toList()));
     }
 
     @PostMapping()
