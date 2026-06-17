@@ -14,10 +14,10 @@ public class BodyMetricsDTO {
     private Long id;
     private double weight;
     private double height;
-    private double imc;
-    private double bodyFatPercentage;
-    private double leanMass;
-    private double bodyWater;
+    private Double imc;
+    private Double bodyFatPercentage;
+    private Double leanMass;
+    private Double bodyWater;
     private Integer visceralFat;
     private Long idUser;
 
