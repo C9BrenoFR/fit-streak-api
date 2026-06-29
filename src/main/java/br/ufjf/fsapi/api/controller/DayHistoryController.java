@@ -6,6 +6,8 @@ import br.ufjf.fsapi.model.entity.DayHistory;
 import br.ufjf.fsapi.model.entity.User;
 import br.ufjf.fsapi.service.DayHistoryService;
 import br.ufjf.fsapi.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
@@ -20,17 +22,13 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/history")
 @RequiredArgsConstructor
 @CrossOrigin
+@Tag(name = "Histórico diario")
 public class DayHistoryController {
     private final DayHistoryService service;
     private final UserService userService;
 
-    @GetMapping()
-    public ResponseEntity get(){
-        List<DayHistory> dayHistories = service.getByUser(Optional.empty());
-        return ResponseEntity.ok(dayHistories.stream().map(DayHistoryDTO::create).collect(Collectors.toList()));
-    }
-
     @GetMapping("/{id}")
+    @Operation(summary = "Busca um histórico diario por ID")
     public ResponseEntity find(@PathVariable("id") Long id){
         Optional<DayHistory> dayHistory = service.getById(id);
         if(!dayHistory.isPresent()){
@@ -40,6 +38,7 @@ public class DayHistoryController {
     }
 
     @PostMapping()
+    @Operation(summary = "Cria um histórico diario")
     public ResponseEntity store(@RequestBody DayHistoryDTO dto){
         try{
             DayHistory dayhistory = convert(dto);
@@ -53,6 +52,7 @@ public class DayHistoryController {
     }
 
     @PutMapping("/{id}")
+    @Operation(summary = "Atualiza um histórico diario")
     public ResponseEntity update(@PathVariable("id") Long id, @RequestBody DayHistoryDTO dto){
         if(!service.getById(id).isPresent()){
             return new ResponseEntity("Histórico do dia não encontrado", HttpStatus.NOT_FOUND);
@@ -70,6 +70,7 @@ public class DayHistoryController {
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "Deleta um histórico diario")
     public ResponseEntity delete(@PathVariable("id") Long id){
         Optional<DayHistory> dayHistory = service.getById(id);
         if(!dayHistory.isPresent()){
