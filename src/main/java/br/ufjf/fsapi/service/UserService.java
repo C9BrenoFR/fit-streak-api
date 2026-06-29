@@ -4,6 +4,11 @@ import br.ufjf.fsapi.exception.BusinessRuleException;
 import br.ufjf.fsapi.model.entity.User;
 import br.ufjf.fsapi.model.repository.UserRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -11,7 +16,11 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Service
-public class UserService {
+public class UserService implements UserDetailsService {
+
+    private PasswordEncoder encoder;
+
+    @Autowired
     private UserRepository repository;
 
     public UserService(UserRepository repository){
@@ -36,6 +45,33 @@ public class UserService {
         repository.delete(user);
     }
 
+    public UserDetails authenticate(User user){
+        UserDetails userDetails = loadUserByUsername(user.getEmail());
+        boolean isPasswordCorrect = encoder.matches(user.getPassword(), userDetails.getPassword());
+
+        if (isPasswordCorrect){
+            return userDetails;
+        }
+        throw new BusinessRuleException("Senha inválida");
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+
+        User user = repository.findByEmail(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado"));
+
+        String[] roles = user.isAdmin()
+                ? new String[]{"ADMIN", "USER"}
+                : new String[]{"USER"};
+
+        return org.springframework.security.core.userdetails.User
+                .builder()
+                .username(user.getEmail())
+                .password(user.getPassword())
+                .roles(roles)
+                .build();
+    }
 
     public void validate(User user)
     {
