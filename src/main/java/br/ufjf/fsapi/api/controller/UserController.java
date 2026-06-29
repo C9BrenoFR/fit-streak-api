@@ -13,6 +13,13 @@ import br.ufjf.fsapi.service.BodyMetricsService;
 import br.ufjf.fsapi.service.DayHistoryService;
 import br.ufjf.fsapi.service.UserService;
 import br.ufjf.fsapi.service.WorkoutService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
@@ -27,6 +34,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
 @CrossOrigin
+@Tag(name = "Usuários")
 public class UserController {
     private final UserService service;
     private final WorkoutService workoutService;
@@ -34,12 +42,33 @@ public class UserController {
     private final DayHistoryService dayHistoryService;
 
     @GetMapping()
+    @Operation(summary = "Busca todos usuários")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Lista de usuários",
+                    content = @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = UserDTO.class)))
+            )
+    })
     public ResponseEntity get(){
         List<User> users = service.getAll();
         return ResponseEntity.ok(users.stream().map(UserDTO::create).collect(Collectors.toList()));
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "Busca um usuário por ID")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Usuário encontrado com sucesso",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Usuário não encontrado",
+                    content = @Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))
+            )
+    })
     public ResponseEntity find(@PathVariable("id") Long id){
         Optional<User> user = service.getById(id);
         if(!user.isPresent()){
@@ -49,6 +78,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}/workouts")
+    @Operation(summary = "Busca os treinos de um usuário")
     public ResponseEntity getWorkouts(@PathVariable("id") Long id){
         Optional<User> user = service.getById(id);
         if(!user.isPresent()){
@@ -60,6 +90,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}/bodymetrics")
+    @Operation(summary = "Busca as métricas corporais de um usuário")
     public ResponseEntity getBodyMetrics(@PathVariable("id") Long id){
         Optional<User> user = service.getById(id);
         if(!user.isPresent()){
@@ -71,6 +102,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}/history")
+    @Operation(summary = "Busca os históricos de treino diário de um usuário")
     public ResponseEntity getDayHistories(@PathVariable("id") Long id){
         Optional<User> user = service.getById(id);
         if(!user.isPresent()){
@@ -82,6 +114,7 @@ public class UserController {
     }
 
     @PostMapping()
+    @Operation(summary = "Cria um usuário")
     public ResponseEntity store(@RequestBody UserDTO dto){
         try {
             User user = convert(dto);
@@ -93,6 +126,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
+    @Operation(summary = "Atualiza os dados de um usuário")
     public ResponseEntity update(@PathVariable("id") Long id,@RequestBody UserDTO dto){
         if(!service.getById(id).isPresent()){
             return new ResponseEntity("Usuário não encontrado", HttpStatus.NOT_FOUND);
@@ -108,6 +142,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "Deleta um usuário")
     public ResponseEntity delete(@PathVariable("id") Long id){
         Optional<User> user = service.getById(id);
         if(!user.isPresent()){

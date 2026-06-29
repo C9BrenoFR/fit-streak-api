@@ -4,6 +4,8 @@ import br.ufjf.fsapi.api.dto.ExerciseDTO;
 import br.ufjf.fsapi.exception.BusinessRuleException;
 import br.ufjf.fsapi.model.entity.Exercise;
 import br.ufjf.fsapi.service.ExerciseService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
@@ -18,16 +20,19 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/exercises")
 @RequiredArgsConstructor
 @CrossOrigin
+@Tag(name = "Exercicios")
 public class ExerciseController {
     private final ExerciseService service;
 
     @GetMapping()
+    @Operation(summary = "Busca todos os exercicios")
     public ResponseEntity get(){
         List<Exercise> exercises = service.getAll();
         return ResponseEntity.ok(exercises.stream().map(ExerciseDTO::create).collect(Collectors.toList()));
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "Busca um exercicio por ID")
     public ResponseEntity find(@PathVariable("id") Long id){
         Optional<Exercise> exercise = service.getById(id);
         if(!exercise.isPresent()){
@@ -37,6 +42,7 @@ public class ExerciseController {
     }
 
     @PostMapping()
+    @Operation(summary = "Cria um exercicio")
     public ResponseEntity store(@RequestBody ExerciseDTO dto){
         try {
             Exercise exercise = convert(dto);
@@ -48,6 +54,7 @@ public class ExerciseController {
     }
 
     @PutMapping("/{id}")
+    @Operation(summary = "Altera os dados de um exercicio")
     public ResponseEntity update(@PathVariable("id") Long id, @RequestBody ExerciseDTO dto){
         if(!service.getById(id).isPresent()){
             return new ResponseEntity("Exercício não encontrado", HttpStatus.NOT_FOUND);
@@ -63,6 +70,7 @@ public class ExerciseController {
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "Deleta um exercicio")
     public ResponseEntity delete(@PathVariable("id") Long id){
         Optional<Exercise> exercise = service.getById(id);
         if(!exercise.isPresent()){

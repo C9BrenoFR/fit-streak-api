@@ -6,6 +6,8 @@ import br.ufjf.fsapi.model.entity.BodyMetrics;
 import br.ufjf.fsapi.model.entity.User;
 import br.ufjf.fsapi.service.BodyMetricsService;
 import br.ufjf.fsapi.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
@@ -20,17 +22,13 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/bodymetrics")
 @RequiredArgsConstructor
 @CrossOrigin
+@Tag(name = "Métricas Corporais")
 public class BodyMetricsController {
     private final BodyMetricsService service;
     private final UserService userService;
 
-    @GetMapping()
-    public ResponseEntity get(){
-        List<BodyMetrics> bodyMetrics = service.getAll();
-        return ResponseEntity.ok(bodyMetrics.stream().map(BodyMetricsDTO::create).collect(Collectors.toList()));
-    }
-
     @GetMapping("/{id}")
+    @Operation(summary = "Busca uma métrica corporal por ID")
     public ResponseEntity find(@PathVariable("id") Long id){
         Optional<BodyMetrics> bodyMetrics = service.getById(id);
         if(!bodyMetrics.isPresent()){
@@ -40,6 +38,7 @@ public class BodyMetricsController {
     }
 
     @PostMapping()
+    @Operation(summary = "Cria uma nova métrica corporal")
     public ResponseEntity store(@RequestBody BodyMetricsDTO dto){
         try {
             BodyMetrics bodyMetrics = convert(dto);
@@ -53,6 +52,7 @@ public class BodyMetricsController {
     }
 
     @PutMapping("/{id}")
+    @Operation(summary = "Atualiza os dados de uma métrica corporal")
     public ResponseEntity update(@PathVariable("id") Long id, @RequestBody BodyMetricsDTO dto){
         if(!service.getById(id).isPresent()){
             return new ResponseEntity("Métrica corporal não encontrada", HttpStatus.NOT_FOUND);
@@ -70,6 +70,7 @@ public class BodyMetricsController {
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "Deleta uma métrica corporal")
     public ResponseEntity delete(@PathVariable("id") Long id){
         Optional<BodyMetrics> bodyMetrics = service.getById(id);
         if(!bodyMetrics.isPresent()){
