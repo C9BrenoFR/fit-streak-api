@@ -21,4 +21,5 @@ public class User {
     private String password;
     private String profilePicture;
     private String gender;
+    private boolean isAdmin;
 }
