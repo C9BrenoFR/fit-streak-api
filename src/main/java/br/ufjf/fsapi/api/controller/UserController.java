@@ -14,6 +14,11 @@ import br.ufjf.fsapi.service.DayHistoryService;
 import br.ufjf.fsapi.service.UserService;
 import br.ufjf.fsapi.service.WorkoutService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -38,6 +43,13 @@ public class UserController {
 
     @GetMapping()
     @Operation(summary = "Busca todos usuários")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Lista de usuários",
+                    content = @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = UserDTO.class)))
+            )
+    })
     public ResponseEntity get(){
         List<User> users = service.getAll();
         return ResponseEntity.ok(users.stream().map(UserDTO::create).collect(Collectors.toList()));
@@ -45,6 +57,18 @@ public class UserController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Busca um usuário por ID")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Usuário encontrado com sucesso",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Usuário não encontrado",
+                    content = @Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))
+            )
+    })
     public ResponseEntity find(@PathVariable("id") Long id){
         Optional<User> user = service.getById(id);
         if(!user.isPresent()){
