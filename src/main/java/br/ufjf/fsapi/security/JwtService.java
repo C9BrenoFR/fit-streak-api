@@ -1,6 +1,6 @@
 package br.ufjf.fsapi.security;
 
-import br.ufjf.fsapi.model.entity.User;
+import br.ufjf.fsapi.api.dto.AuthDTO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import io.jsonwebtoken.Claims;
@@ -22,7 +22,7 @@ public class JwtService {
     @Value("${security.jwt.api-key}")
     private String apiKey;
 
-    public String generateToken(User user){
+    public String generateToken(AuthDTO user){
         long expString = Long.valueOf(expires);
         LocalDateTime expDateTime = LocalDateTime.now().plusDays(expString);
         Instant instant = expDateTime.atZone(ZoneId.systemDefault()).toInstant();
