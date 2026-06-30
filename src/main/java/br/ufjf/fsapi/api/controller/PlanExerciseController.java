@@ -42,20 +42,6 @@ public class PlanExerciseController {
     private final ExerciseService exerciseService;
     private final SetService setService;
 
-    @GetMapping()
-    @Operation(summary = "Busca todos os exercícios da ficha")
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Lista de Exercícios da ficha",
-                    content = @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = PlanExerciseDTO.class)))
-            )
-    })
-    public ResponseEntity get(){
-        List<PlanExercise> planExercises = service.getAll();
-        return ResponseEntity.ok(planExercises.stream().map(PlanExerciseDTO::create).collect(Collectors.toList()));
-    }
-
     @GetMapping("/{id}")
     @Operation(summary = "Busca um exercício da ficha pelo ID")
     @ApiResponses(value = {

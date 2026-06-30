@@ -3,6 +3,7 @@ package br.ufjf.fsapi.api.controller;
 import br.ufjf.fsapi.api.dto.AuthDTO;
 import br.ufjf.fsapi.api.dto.LoginDTO;
 import br.ufjf.fsapi.exception.BusinessRuleException;
+import br.ufjf.fsapi.model.entity.User;
 import br.ufjf.fsapi.security.JwtService;
 import br.ufjf.fsapi.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -13,6 +14,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/login")
@@ -28,8 +31,9 @@ public class AuthController {
     public LoginDTO store(@RequestBody AuthDTO dto){
         try{
             UserDetails userDetails = service.authenticate(dto);
+            Optional<User> user = service.getByEmail(userDetails.getUsername());
             String token = jwtService.generateToken(dto);
-            return new LoginDTO(userDetails, token);
+            return new LoginDTO(user.get(), token);
         } catch (UsernameNotFoundException | BusinessRuleException exception){
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, exception.getMessage());
         }
