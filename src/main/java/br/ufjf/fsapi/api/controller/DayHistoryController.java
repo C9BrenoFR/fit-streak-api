@@ -1,12 +1,19 @@
 package br.ufjf.fsapi.api.controller;
 
 import br.ufjf.fsapi.api.dto.DayHistoryDTO;
+import br.ufjf.fsapi.api.dto.PlanDTO;
 import br.ufjf.fsapi.exception.BusinessRuleException;
 import br.ufjf.fsapi.model.entity.DayHistory;
+import br.ufjf.fsapi.model.entity.Plan;
 import br.ufjf.fsapi.model.entity.User;
 import br.ufjf.fsapi.service.DayHistoryService;
 import br.ufjf.fsapi.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -29,6 +36,18 @@ public class DayHistoryController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Busca um histórico diario por ID")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Histórico do dia encontrado",
+                    content = @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = DayHistoryDTO.class)))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Histórico do dia não encontrado",
+                    content = @Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))
+            )
+    })
     public ResponseEntity find(@PathVariable("id") Long id){
         Optional<DayHistory> dayHistory = service.getById(id);
         if(!dayHistory.isPresent()){
@@ -39,6 +58,18 @@ public class DayHistoryController {
 
     @PostMapping()
     @Operation(summary = "Cria um histórico diario")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = " Histórico diário foi criado",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = DayHistory.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Histótico diário não foi criado",
+                    content = @Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))
+            )
+    })
     public ResponseEntity store(@RequestBody DayHistoryDTO dto){
         try{
             DayHistory dayhistory = convert(dto);
@@ -52,7 +83,7 @@ public class DayHistoryController {
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Atualiza um histórico diario")
+    @Operation(summary = "Atualiza os dados de um histórico diario")
     public ResponseEntity update(@PathVariable("id") Long id, @RequestBody DayHistoryDTO dto){
         if(!service.getById(id).isPresent()){
             return new ResponseEntity("Histórico do dia não encontrado", HttpStatus.NOT_FOUND);

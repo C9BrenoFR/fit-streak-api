@@ -1,12 +1,18 @@
 package br.ufjf.fsapi.api.controller;
 
 import br.ufjf.fsapi.api.dto.BodyMetricsDTO;
+import br.ufjf.fsapi.api.dto.WorkoutDTO;
 import br.ufjf.fsapi.exception.BusinessRuleException;
 import br.ufjf.fsapi.model.entity.BodyMetrics;
 import br.ufjf.fsapi.model.entity.User;
 import br.ufjf.fsapi.service.BodyMetricsService;
 import br.ufjf.fsapi.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -29,6 +35,18 @@ public class BodyMetricsController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Busca uma métrica corporal por ID")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Métrica corporal encontrada",
+                    content = @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = BodyMetricsDTO.class)))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Métrica corporal não encontrada",
+                    content = @Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))
+            )
+    })
     public ResponseEntity find(@PathVariable("id") Long id){
         Optional<BodyMetrics> bodyMetrics = service.getById(id);
         if(!bodyMetrics.isPresent()){
@@ -39,6 +57,18 @@ public class BodyMetricsController {
 
     @PostMapping()
     @Operation(summary = "Cria uma nova métrica corporal")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Métricas corporais foram criadas",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = BodyMetrics.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Métricas corporais não foram criadas",
+                    content = @Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))
+            )
+    })
     public ResponseEntity store(@RequestBody BodyMetricsDTO dto){
         try {
             BodyMetrics bodyMetrics = convert(dto);

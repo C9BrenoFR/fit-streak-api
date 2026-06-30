@@ -115,6 +115,18 @@ public class UserController {
 
     @PostMapping()
     @Operation(summary = "Cria um usuário")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Usuário foi criado",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = User.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Usuário não foi criado",
+                    content = @Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))
+            )
+    })
     public ResponseEntity store(@RequestBody UserDTO dto){
         try {
             User user = convert(dto);

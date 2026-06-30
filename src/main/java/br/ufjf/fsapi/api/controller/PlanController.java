@@ -2,13 +2,22 @@ package br.ufjf.fsapi.api.controller;
 
 import br.ufjf.fsapi.api.dto.PlanDTO;
 import br.ufjf.fsapi.api.dto.PlanExerciseDTO;
+import br.ufjf.fsapi.api.dto.WorkoutDTO;
 import br.ufjf.fsapi.exception.BusinessRuleException;
+import br.ufjf.fsapi.model.entity.BodyMetrics;
 import br.ufjf.fsapi.model.entity.Plan;
 import br.ufjf.fsapi.model.entity.PlanExercise;
 import br.ufjf.fsapi.model.entity.Workout;
 import br.ufjf.fsapi.service.PlanExerciseService;
 import br.ufjf.fsapi.service.PlanService;
 import br.ufjf.fsapi.service.WorkoutService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
@@ -23,18 +32,40 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/plans")
 @RequiredArgsConstructor
 @CrossOrigin
+@Tag(name = "Fichas")
 public class PlanController {
     private final PlanService service;
     private final WorkoutService workoutService;
     private final PlanExerciseService planExerciseService;
 
     @GetMapping()
+    @Operation(summary = "Busca todas as fichas")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Lista de Fichas",
+                    content = @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = PlanDTO.class)))
+            )
+    })
     public ResponseEntity get(){
         List<Plan> plans = service.getAll();
         return ResponseEntity.ok(plans.stream().map(PlanDTO::create).collect(Collectors.toList()));
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "Busca uma ficha pelo ID")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Ficha encontrada",
+                    content = @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = PlanDTO.class)))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Ficha não encontrada",
+                    content = @Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))
+            )
+    })
     public ResponseEntity find(@PathVariable("id") Long id){
         Optional<Plan> plan = service.getById(id);
         if(!plan.isPresent()){
@@ -44,6 +75,19 @@ public class PlanController {
     }
 
     @GetMapping("/{id}/exercises")
+    @Operation(summary = "Busca um exercício pelo ID")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Exercício do plano encontrado",
+                    content = @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = PlanExercise.class)))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Exercício do plano não encontrado",
+                    content = @Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))
+            )
+    })
     public ResponseEntity getExercises(@PathVariable("id") Long id){
         Optional<Plan> plan = service.getById(id);
         if(!plan.isPresent()){
@@ -55,6 +99,19 @@ public class PlanController {
     }
 
     @PostMapping()
+    @Operation(summary = "Cria uma ficha")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Ficha foi criada",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = Plan.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Ficha não foi criada",
+                    content = @Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))
+            )
+    })
     public ResponseEntity store(@RequestBody PlanDTO dto){
         try {
             Plan plan = convert(dto);
@@ -68,6 +125,7 @@ public class PlanController {
     }
 
     @PutMapping("/{id}")
+    @Operation(summary = "Atualiza os dados de uma ficha")
     public ResponseEntity update(@PathVariable("id") Long id, @RequestBody PlanDTO dto){
         if(!service.getById(id).isPresent()){
             return new ResponseEntity("Plano não encontrado", HttpStatus.NOT_FOUND);
@@ -85,6 +143,7 @@ public class PlanController {
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "Deleta uma ficha")
     public ResponseEntity delete(@PathVariable("id") Long id){
         Optional<Plan> plan = service.getById(id);
         if(!plan.isPresent()){

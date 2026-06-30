@@ -1,10 +1,17 @@
 package br.ufjf.fsapi.api.controller;
 
 import br.ufjf.fsapi.api.dto.ExerciseDTO;
+import br.ufjf.fsapi.api.dto.WorkoutDTO;
 import br.ufjf.fsapi.exception.BusinessRuleException;
 import br.ufjf.fsapi.model.entity.Exercise;
+import br.ufjf.fsapi.model.entity.Plan;
 import br.ufjf.fsapi.service.ExerciseService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -26,6 +33,13 @@ public class ExerciseController {
 
     @GetMapping()
     @Operation(summary = "Busca todos os exercicios")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Lista de exercícios",
+                    content = @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = ExerciseDTO.class)))
+            )
+    })
     public ResponseEntity get(){
         List<Exercise> exercises = service.getAll();
         return ResponseEntity.ok(exercises.stream().map(ExerciseDTO::create).collect(Collectors.toList()));
@@ -33,6 +47,18 @@ public class ExerciseController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Busca um exercicio por ID")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Exercício encontrado",
+                    content = @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = ExerciseDTO.class)))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Exercício não encontrado",
+                    content = @Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))
+            )
+    })
     public ResponseEntity find(@PathVariable("id") Long id){
         Optional<Exercise> exercise = service.getById(id);
         if(!exercise.isPresent()){
@@ -43,6 +69,18 @@ public class ExerciseController {
 
     @PostMapping()
     @Operation(summary = "Cria um exercicio")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Exercício foi criado",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = Exercise.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Exercício não foi criado",
+                    content = @Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))
+            )
+    })
     public ResponseEntity store(@RequestBody ExerciseDTO dto){
         try {
             Exercise exercise = convert(dto);
@@ -54,7 +92,7 @@ public class ExerciseController {
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Altera os dados de um exercicio")
+    @Operation(summary = "Atualiza os dados de um exercicio")
     public ResponseEntity update(@PathVariable("id") Long id, @RequestBody ExerciseDTO dto){
         if(!service.getById(id).isPresent()){
             return new ResponseEntity("Exercício não encontrado", HttpStatus.NOT_FOUND);

@@ -1,11 +1,20 @@
 package br.ufjf.fsapi.api.controller;
 
 import br.ufjf.fsapi.api.dto.SetDTO;
+import br.ufjf.fsapi.api.dto.WorkoutDTO;
 import br.ufjf.fsapi.exception.BusinessRuleException;
 import br.ufjf.fsapi.model.entity.PlanExercise;
 import br.ufjf.fsapi.model.entity.Set;
+import br.ufjf.fsapi.model.entity.Workout;
 import br.ufjf.fsapi.service.PlanExerciseService;
 import br.ufjf.fsapi.service.SetService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
@@ -20,17 +29,39 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/sets")
 @RequiredArgsConstructor
 @CrossOrigin
+@Tag(name = "Séries")
 public class SetController {
     private final SetService service;
     private final PlanExerciseService planExerciseService;
 
     @GetMapping()
+    @Operation(summary = "Busca todas as séries")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Lista de séries",
+                    content = @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = SetDTO.class)))
+            )
+    })
     public ResponseEntity get(){
         List<Set> sets = service.getAll();
         return ResponseEntity.ok(sets.stream().map(SetDTO::create).collect(Collectors.toList()));
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "Busca uma série pelo ID")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Série encontrado",
+                    content = @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = SetDTO.class)))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Série não encontrada",
+                    content = @Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))
+            )
+    })
     public ResponseEntity find(@PathVariable("id") Long id){
         Optional<Set> set = service.getById(id);
         if(!set.isPresent()){
@@ -40,6 +71,19 @@ public class SetController {
     }
 
     @PostMapping()
+    @Operation(summary = "Cria uma série")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Série foi criada",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = Set.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Série não foi criada",
+                    content = @Content(mediaType = "text/plain", schema = @Schema(implementation = String.class))
+            )
+    })
     public ResponseEntity store(@RequestBody SetDTO dto){
         try {
             Set set = convert(dto);
@@ -53,6 +97,7 @@ public class SetController {
     }
 
     @PutMapping("/{id}")
+    @Operation(summary = "Atualiza os dados de uma série")
     public ResponseEntity update(@PathVariable("id") Long id, @RequestBody SetDTO dto){
         if(!service.getById(id).isPresent()){
             return new ResponseEntity("Série não encontrada", HttpStatus.NOT_FOUND);
@@ -70,6 +115,7 @@ public class SetController {
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "Deleta uma série")
     public ResponseEntity delete(@PathVariable("id") Long id){
         Optional<Set> set = service.getById(id);
         if(!set.isPresent()){
