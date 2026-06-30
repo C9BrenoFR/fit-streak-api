@@ -1,5 +1,6 @@
 package br.ufjf.fsapi.service;
 
+import br.ufjf.fsapi.api.dto.AuthDTO;
 import br.ufjf.fsapi.exception.BusinessRuleException;
 import br.ufjf.fsapi.model.entity.User;
 import br.ufjf.fsapi.model.repository.UserRepository;
@@ -18,6 +19,7 @@ import java.util.Optional;
 @Service
 public class UserService implements UserDetailsService {
 
+    @Autowired
     private PasswordEncoder encoder;
 
     @Autowired
@@ -33,6 +35,8 @@ public class UserService implements UserDetailsService {
 
     public Optional<User> getById(Long id){ return repository.findById(id); }
 
+    public Optional<User> getByEmail(String email){ return repository.findByEmail(email); }
+
     @Transactional
     public User save(User user){
         validate(user);
@@ -45,7 +49,7 @@ public class UserService implements UserDetailsService {
         repository.delete(user);
     }
 
-    public UserDetails authenticate(User user){
+    public UserDetails authenticate(AuthDTO user){
         UserDetails userDetails = loadUserByUsername(user.getEmail());
         boolean isPasswordCorrect = encoder.matches(user.getPassword(), userDetails.getPassword());
 

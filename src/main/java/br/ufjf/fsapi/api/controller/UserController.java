@@ -24,6 +24,9 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -40,6 +43,7 @@ public class UserController {
     private final WorkoutService workoutService;
     private final BodyMetricsService dayService;
     private final DayHistoryService dayHistoryService;
+    private final PasswordEncoder encoder;
 
     @GetMapping()
     @Operation(summary = "Busca todos usuários")
@@ -117,7 +121,16 @@ public class UserController {
     @Operation(summary = "Cria um usuário")
     public ResponseEntity store(@RequestBody UserDTO dto){
         try {
+            if (dto.getPassword() == null || dto.getPassword().trim().isEmpty() ||
+                    dto.getConfirmPassword() == null || dto.getConfirmPassword().trim().isEmpty()) {
+                return ResponseEntity.badRequest().body("Senha inválida");
+            }
+            if (!dto.getPassword().equals(dto.getConfirmPassword())) {
+                return ResponseEntity.badRequest().body("Senhas não conferem");
+            }
             User user = convert(dto);
+            String encodedPassword = encoder.encode(dto.getPassword());
+            user.setPassword(encodedPassword);
             user = service.save(user);
             return new ResponseEntity(user, HttpStatus.CREATED);
         } catch (BusinessRuleException e){
@@ -146,6 +159,38 @@ public class UserController {
     public ResponseEntity delete(@PathVariable("id") Long id){
         Optional<User> user = service.getById(id);
         if(!user.isPresent()){
+            return new ResponseEntity("Usuário não encontrado", HttpStatus.NOT_FOUND);
+        }
+        try {
+            service.destroy(user.get());
+            return new ResponseEntity(HttpStatus.NO_CONTENT);
+        } catch (BusinessRuleException e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/profile")
+    @Operation(summary = "Atualiza os dados do usuário logado")
+    public ResponseEntity updateProfile(@RequestBody UserDTO dto, @AuthenticationPrincipal UserDetails logged){
+        Optional<User> authUser = service.getByEmail(logged.getUsername());
+        if(authUser.isEmpty()){
+            return new ResponseEntity("Usuário não encontrado", HttpStatus.NOT_FOUND);
+        }
+        try {
+            User user = convert(dto);
+            user.setId(authUser.get().getId());
+            user = service.save(user);
+            return new ResponseEntity(user, HttpStatus.OK);
+        } catch (BusinessRuleException e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/profile")
+    @Operation(summary = "Deleta o usuário logado")
+    public ResponseEntity deleteProfile(@AuthenticationPrincipal UserDetails logged){
+        Optional<User> user = service.getByEmail(logged.getUsername());
+        if(user.isEmpty()){
             return new ResponseEntity("Usuário não encontrado", HttpStatus.NOT_FOUND);
         }
         try {
